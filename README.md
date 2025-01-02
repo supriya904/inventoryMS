@@ -2,34 +2,52 @@
 
 A comprehensive web-based inventory management system built with PHP and MySQL, designed to help businesses track and manage their product inventory efficiently.
 
-## Features (Current & Planned)
+## Features
 
 ### Current Features
 - Secure Login System
-  - Default admin login credentials (to be changed after first login)
+  - User authentication with password hashing
+  - Role-based access (Admin)
+
 - Modern Dashboard Interface
   - Clean and intuitive user interface
   - Sidebar navigation with quick access to all features
   - User profile integration
   - Main dashboard overview with system title
 
-### Planned Features
-- Dashboard with inventory overview
 - Product Management
-  - Add/Edit/Delete products
+  - View all products in a responsive grid layout
+  - Filter products by categories
+  - Add new products with images
+  - Update existing products
   - Track product quantities
   - Set price information
-- Category Management
-  - Organize products by categories
-- Supplier Management
-  - Maintain supplier information
-  - Track supplier transactions
+  - Image management for products
+  - Automatic transaction logging for stock changes
+
+- Category-based Organization
+  - Products organized by categories
+  - Category-wise product filtering
+  - Category-specific image storage
+
 - Inventory Transactions
-  - Record purchases and sales
-  - Transaction history
+  - Automatic transaction logging
+  - Track stock changes
+  - Record purchase and sale transactions
+  - Transaction history with remarks
+
+### Planned Features
+- Reports and Analytics
+  - Stock level reports
+  - Transaction history reports
+  - Sales analytics
 - User Management
-  - Role-based access control
-  - User authentication and authorization
+  - Multiple user roles
+  - User permissions
+- Advanced Search
+  - Search by product name
+  - Filter by price range
+  - Stock level filters
 
 ## Database Schema
 
@@ -67,50 +85,59 @@ The system uses MySQL with the following main tables:
 - MySQL 5.7 or higher
 - Apache Web Server
 - XAMPP (recommended for local development)
-
-## Installation
-
-1. Clone this repository to your XAMPP's htdocs folder
-2. Import the `schema.sql` file into your MySQL database
-3. Configure your database connection settings
-4. Access the application through your web browser
+- Modern web browser with JavaScript enabled
 
 ## Project Structure
 
 ```
 inventoryMS/
+├── api/                 # API endpoints
+│   ├── config.php      # Database configuration
+│   ├── login.php       # Login authentication
+│   ├── add_product.php # Product creation
+│   └── update_product.php # Product updates
+├── assets/             # Image storage
+│   ├── Laptops/       # Category-wise images
+│   ├── Smartphones/
+│   ├── Accessories/
+│   ├── Tablets/
+│   └── Wearables/
+├── dashboard/          # Dashboard interface
+│   ├── dashboard.html  # Main dashboard
+│   ├── dashboard.css   # Dashboard styles
+│   └── templates/      # Page templates
 ├── index.php          # Entry point
 ├── login.html         # Login page
 ├── schema.sql         # Database schema
-├── README.md          # Project documentation
-└── [more files to be added as development progresses]
+└── README.md          # Documentation
 ```
 
-## Development Roadmap
+## Installation
+
+1. Clone this repository to your XAMPP's htdocs folder
+2. Import the `schema.sql` file into your MySQL database
+3. Configure database connection in `api/config.php`
+4. Access the application through your web browser
+5. Default login credentials:
+   - Username: admin1
+   - Password: password (change this in production)
+
+## Development Status
 
 1. ✅ Basic Project Setup
 2. ✅ Database Schema Design
 3. ✅ Login System Implementation
-4. 🔄 Dashboard Development
-5. 📅 Product Management
-6. 📅 Category Management
-7. 📅 Supplier Management
-8. 📅 Transaction Management
-9. 📅 User Management
-10. 📅 Reports and Analytics
+4. ✅ Dashboard Development
+5. ✅ Product Management
+6. ✅ Category Management
+7. ✅ Transaction Management
+8. 🔄 User Management
+9. 📅 Reports and Analytics
 
-## Security Considerations
+## Security Features
 
-- Password hashing implementation
-- SQL injection prevention
-- Session management
-- Input validation and sanitization
-- Access control implementation
-
-## Contributing
-
-This is a development project. More contribution guidelines will be added as the project progresses.
-
-## License
-
-[License information to be added]
+- Password hashing for user credentials
+- Input sanitization
+- Prepared SQL statements to prevent SQL injection
+- File upload validation
+- Session-based authentication
