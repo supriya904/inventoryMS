@@ -3,10 +3,6 @@
         <h2>Products</h2>
         <div class="header-buttons">
             <button class="add-product-btn" onclick="openAddProductModal()">Add New Product</button>
-            <button class="update-product-btn" onclick="openUpdateModal()">Update Product</button>
-            <select id="product-select" class="product-select" style="display: none;">
-                <option value="">Select a product to update</option>
-            </select>
         </div>
     </div>
     
@@ -53,41 +49,6 @@
     </div>
 </div>
 
-<!-- Update Product Modal -->
-<div id="updateProductModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Update Product</h2>
-        <form id="updateProductForm" enctype="multipart/form-data">
-            <input type="hidden" id="update_product_id" name="update_product_id">
-            <div class="form-group">
-                <label for="update_product_name">Product Name</label>
-                <input type="text" id="update_product_name" name="update_product_name" required>
-            </div>
-            <div class="form-group">
-                <label for="update_category_name">Category</label>
-                <select id="update_category_name" name="update_category_name" required>
-                    <!-- Categories will be dynamically added here -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="update_quantity">Quantity in Stock</label>
-                <input type="number" id="update_quantity" name="update_quantity" min="0" required>
-            </div>
-            <div class="form-group">
-                <label for="update_price">Price Per Unit</label>
-                <input type="number" id="update_price" name="update_price" min="0" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="update_product_image">Product Image</label>
-                <input type="file" id="update_product_image" name="update_product_image" accept="image/*">
-                <div id="update_image_preview"></div>
-            </div>
-            <button type="submit">Update Product</button>
-        </form>
-    </div>
-</div>
-
 <style>
 .products-container {
     padding: 20px;
@@ -106,32 +67,17 @@
     align-items: center;
 }
 
-.add-product-btn, .update-product-btn {
+.add-product-btn {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     color: white;
-}
-
-.add-product-btn {
     background: #4CAF50;
 }
 
-.update-product-btn {
-    background: #007bff;
-}
-
 .product-select {
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    margin-left: 10px;
     display: none;
-}
-
-.product-select.show {
-    display: block;
 }
 
 .category-filters {
@@ -267,19 +213,13 @@
     max-width: 100%;
     border-radius: 4px;
 }
-
-#update_image_preview {
-    margin-top: 10px;
-    max-width: 200px;
-}
-
-#update_image_preview img {
-    max-width: 100%;
-    border-radius: 4px;
-}
 </style>
 
 <script>
+function openAddProductModal() {
+    $('#addProductModal').show();
+}
+
 $(document).ready(function() {
     let allProducts = [];
     let activeCategory = 'all';
@@ -320,7 +260,6 @@ $(document).ready(function() {
             .map(cat => `<option value="${cat}">${cat}</option>`)
             .join('');
         $('#category_name').html(categoryOptions);
-        $('#update_category_name').html(categoryOptions);
     }
 
     // Display products
@@ -338,15 +277,6 @@ $(document).ready(function() {
         `).join('');
         
         $('.products-grid').html(productsHtml);
-
-        // Update product select dropdown
-        const selectOptions = products.map(product => 
-            `<option value="${product.id}" 
-                     data-product='${JSON.stringify(product)}'>
-                ${product.name} (${product.category})
-            </option>`
-        ).join('');
-        $('#product-select').html('<option value="">Select a product to update</option>' + selectOptions);
     }
 
     // Filter products by category
@@ -403,85 +333,20 @@ $(document).ready(function() {
         });
     });
 
-    // Update Modal functions
-    function openUpdateModal() {
-        const select = $('#product-select');
-        if (select.is(':hidden')) {
-            select.show();
-            return;
-        }
-        
-        const selectedOption = select.find('option:selected');
-        if (!selectedOption.val()) {
-            alert('Please select a product to update');
-            return;
-        }
-
-        const product = JSON.parse(selectedOption.data('product'));
-        $('#update_product_id').val(product.id);
-        $('#update_product_name').val(product.name);
-        $('#update_category_name').val(product.category);
-        $('#update_quantity').val(product.quantity);
-        $('#update_price').val(product.price);
-        $('#update_image_preview').html(`<img src="../${product.image}">`);
-        $('#updateProductModal').show();
-        select.hide();
-    }
-
-    function closeUpdateModal() {
-        $('#updateProductModal').hide();
-        $('#product-select').hide();
-    }
-
-    // Handle update form submission
-    $('#updateProductForm').submit(function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        
-        $.ajax({
-            url: '../api/update_product.php',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.status) {
-                    alert('Product updated successfully!');
-                    $('#updateProductModal').hide();
-                    $('#updateProductForm')[0].reset();
-                    $('#update_image_preview').empty();
-                    loadProducts(); // Reload products
-                } else {
-                    alert('Error: ' + response.message);
-                }
-            },
-            error: function(xhr) {
-                alert('Error updating product. Please try again.');
-            }
-        });
-    });
-
     // Initialize
     loadProducts();
-});
+    setupCategoryFilters();
 
-// Modal functions
-function openAddProductModal() {
-    $('#addProductModal').show();
-}
-
-// Close modal when clicking the X
-$('.close').click(function() {
-    $('#addProductModal').hide();
-    $('#updateProductModal').hide();
-});
-
-// Close modal when clicking outside
-$(window).click(function(e) {
-    if ($(e.target).is('#addProductModal') || $(e.target).is('#updateProductModal')) {
+    // Close modal when clicking the X
+    $('.close').click(function() {
         $('#addProductModal').hide();
-        $('#updateProductModal').hide();
-    }
+    });
+
+    // Close modal when clicking outside
+    $(window).click(function(event) {
+        if ($(event.target).is('#addProductModal')) {
+            $('#addProductModal').hide();
+        }
+    });
 });
 </script>
