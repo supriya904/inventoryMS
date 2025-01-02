@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-boxes"></i>
+                <span>Inventory Pro</span>
+            </div>
+            <div class="user-profile">
+                <img src="assets/priya.jpg" alt="Profile" class="profile-img">
+                <span>Supriya</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active">
+                    <a href="#" data-page="home"><i class="fas fa-home"></i>Dashboard</a>
+                </li>
+                <li>
+                    <a href="#" data-page="products"><i class="fas fa-box"></i>Products</a>
+                </li>
+                <li>
+                    <a href="#" data-page="transactions"><i class="fas fa-exchange-alt"></i>Transactions</a>
+                </li>
+                <li>
+                    <a href="#" data-page="suppliers"><i class="fas fa-users"></i>Suppliers</a>
+                </li>
+                <li>
+                    <a href="#" data-page="reports"><i class="fas fa-chart-bar"></i>Reports</a>
+                </li>
+                
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <h1 class="dashboard-title">Inventory Management System</h1>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Content will be loaded dynamically -->
+                <div class="loading">Loading...</div>
+            </div>
+        </main>
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Load initial dashboard content
+            loadContent('home');
+            
+            // Handle navigation clicks
+            $('.nav-links a').click(function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                loadContent(page);
+            });
+        });
+
+        // Dynamic content loading
+        function loadContent(page) {
+            // Update active state in navigation
+            $('.nav-links li').removeClass('active');
+            $(`a[data-page="${page}"]`).parent().addClass('active');
+
+            const contentDiv = $('.dashboard-content');
+            contentDiv.html('<div class="loading">Loading...</div>');
+
+            // Load content based on page
+            $.get(`templates/${page}.html`)
+                .done(function(response) {
+                    contentDiv.html(response);
+                })
+                .fail(function(error) {
+                    contentDiv.html('<div class="error">Error loading content. Please try again.</div>');
+                    console.error('Error loading content:', error);
+                });
+        }
+    </script>
+</body>
+</html>
