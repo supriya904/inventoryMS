@@ -45,22 +45,17 @@ The system uses MySQL with the following main tables:
    - Category_ID (Foreign Key)
    - Quantity_In_Stock
    - Price_Per_Unit
+   - imageAddress
 
-3. **Suppliers**
-   - Supplier_ID (Primary Key)
-   - Supplier_Name
-   - Contact_Info
-
-4. **Inventory_Transactions**
+3. **Inventory_Transactions**
    - Transaction_ID (Primary Key)
    - Product_ID (Foreign Key)
    - Transaction_Type (Purchase/Sale)
    - Quantity
    - Transaction_Date
-   - Supplier_ID (Foreign Key)
    - Remarks
 
-5. **Users**
+4. **Users**
    - User_ID (Primary Key)
    - Username
    - Password_Hash

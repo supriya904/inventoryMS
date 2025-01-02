@@ -78,14 +78,44 @@ try {
     $stmt->bindParam(":price", $_POST['price']);
     $stmt->bindParam(":image", $image_result['path']);
     
-    if ($stmt->execute()) {
+    // Start transaction
+    $db->beginTransaction();
+    
+    try {
+        if ($stmt->execute()) {
+            $product_id = $db->lastInsertId();
+            
+            // Add transaction record
+            $transaction_query = "INSERT INTO Inventory_Transactions 
+                                (Product_ID, Transaction_Type, Quantity, Transaction_Date, Remarks) 
+                                VALUES 
+                                (:product_id, 'Purchase', :quantity, CURDATE(), :remarks)";
+            
+            $trans_stmt = $db->prepare($transaction_query);
+            $trans_stmt->bindParam(":product_id", $product_id);
+            $trans_stmt->bindParam(":quantity", $_POST['quantity']);
+            $remarks = "Initial stock entry for " . $_POST['product_name'];
+            $trans_stmt->bindParam(":remarks", $remarks);
+            
+            if ($trans_stmt->execute()) {
+                $db->commit();
+                echo json_encode(array(
+                    "status" => true,
+                    "message" => "Product added successfully with initial transaction record.",
+                    "id" => $product_id
+                ));
+            } else {
+                throw new Exception("Error creating transaction record");
+            }
+        } else {
+            throw new Exception("Error adding product");
+        }
+    } catch(Exception $e) {
+        $db->rollBack();
         echo json_encode(array(
-            "status" => true,
-            "message" => "Product added successfully.",
-            "id" => $db->lastInsertId()
+            "status" => false,
+            "message" => $e->getMessage()
         ));
-    } else {
-        throw new Exception("Error adding product");
     }
     
 } catch(Exception $e) {
