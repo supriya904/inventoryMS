@@ -19,6 +19,7 @@ CREATE TABLE Products (
     Category_ID INT NOT NULL,
     Quantity_In_Stock INT NOT NULL,
     Price_Per_Unit DECIMAL(10, 2) NOT NULL,
+    imageAddress VARCHAR(255),
     FOREIGN KEY (Category_ID) REFERENCES Categories(Category_ID)
 );
 

@@ -1,0 +1,174 @@
+<div class="products-container">
+    <div class="products-header">
+        <h2>Products</h2>
+        <button class="add-product-btn">Add New Product</button>
+    </div>
+    
+    <div class="category-filters">
+        <!-- Category filters will be dynamically added here -->
+    </div>
+    
+    <div class="products-grid">
+        <!-- Products will be dynamically loaded here -->
+    </div>
+</div>
+
+<style>
+.products-container {
+    padding: 20px;
+}
+
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.add-product-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.category-filters {
+    margin-bottom: 20px;
+}
+
+.category-filter {
+    margin-right: 10px;
+    padding: 5px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.category-filter.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.product-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.product-category {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.product-price {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.product-stock {
+    color: #28a745;
+    font-size: 0.9em;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    let allProducts = [];
+    let activeCategory = 'all';
+
+    // Fetch products
+    function loadProducts() {
+        $.ajax({
+            url: '../api/get_products.php',
+            type: 'GET',
+            success: function(response) {
+                if (response.status) {
+                    allProducts = response.data;
+                    setupCategoryFilters();
+                    displayProducts(allProducts);
+                }
+            },
+            error: function(xhr) {
+                console.error('Error loading products:', xhr);
+            }
+        });
+    }
+
+    // Setup category filters
+    function setupCategoryFilters() {
+        const categories = ['all', ...new Set(allProducts.map(p => p.category))];
+        const filtersHtml = categories.map(cat => 
+            `<button class="category-filter ${cat === 'all' ? 'active' : ''}" 
+                     data-category="${cat}">
+                ${cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </button>`
+        ).join('');
+        
+        $('.category-filters').html(filtersHtml);
+    }
+
+    // Display products
+    function displayProducts(products) {
+        const productsHtml = products.map(product => `
+            <div class="product-card">
+                <img src="../${product.image}" alt="${product.name}" class="product-image">
+                <div class="product-info">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-category">${product.category}</div>
+                    <div class="product-price">₹${product.price.toLocaleString()}</div>
+                    <div class="product-stock">In Stock: ${product.quantity}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        $('.products-grid').html(productsHtml);
+    }
+
+    // Filter products by category
+    $(document).on('click', '.category-filter', function() {
+        const category = $(this).data('category');
+        $('.category-filter').removeClass('active');
+        $(this).addClass('active');
+        
+        const filteredProducts = category === 'all' 
+            ? allProducts 
+            : allProducts.filter(p => p.category === category);
+        
+        displayProducts(filteredProducts);
+    });
+
+    // Initialize
+    loadProducts();
+});
+</script>
