@@ -1,7 +1,7 @@
 <div class="products-container">
     <div class="products-header">
         <h2>Products</h2>
-        <button class="add-product-btn">Add New Product</button>
+        <button class="add-product-btn" onclick="openAddProductModal()">Add New Product</button>
     </div>
     
     <div class="category-filters">
@@ -10,6 +10,40 @@
     
     <div class="products-grid">
         <!-- Products will be dynamically loaded here -->
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="addProductModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add New Product</h2>
+        <form id="addProductForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="product_name">Product Name</label>
+                <input type="text" id="product_name" name="product_name" required>
+            </div>
+            <div class="form-group">
+                <label for="category_name">Category</label>
+                <select id="category_name" name="category_name" required>
+                    <!-- Categories will be dynamically added here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Quantity in Stock</label>
+                <input type="number" id="quantity" name="quantity" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Price Per Unit</label>
+                <input type="number" id="price" name="price" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="product_image">Product Image</label>
+                <input type="file" id="product_image" name="product_image" accept="image/*" required>
+                <div id="image_preview"></div>
+            </div>
+            <button type="submit">Add Product</button>
+        </form>
     </div>
 </div>
 
@@ -100,6 +134,73 @@
     color: #28a745;
     font-size: 0.9em;
 }
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    overflow-y: auto;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    position: relative;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.close {
+    position: sticky;
+    top: 0;
+    right: 0;
+    float: right;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2;
+    background: #fefefe;
+    padding: 0 5px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#image_preview {
+    margin-top: 10px;
+    max-width: 200px;
+}
+
+#image_preview img {
+    max-width: 100%;
+    border-radius: 4px;
+}
 </style>
 
 <script>
@@ -136,6 +237,13 @@ $(document).ready(function() {
         ).join('');
         
         $('.category-filters').html(filtersHtml);
+
+        // Also update the category select in the form
+        const categoryOptions = categories
+            .filter(cat => cat !== 'all')
+            .map(cat => `<option value="${cat}">${cat}</option>`)
+            .join('');
+        $('#category_name').html(categoryOptions);
     }
 
     // Display products
@@ -168,7 +276,65 @@ $(document).ready(function() {
         displayProducts(filteredProducts);
     });
 
+    // Handle image preview
+    $('#product_image').change(function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#image_preview').html(`<img src="${e.target.result}">`);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle form submission
+    $('#addProductForm').submit(function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: '../api/add_product.php',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.status) {
+                    alert('Product added successfully!');
+                    $('#addProductModal').hide();
+                    $('#addProductForm')[0].reset();
+                    $('#image_preview').empty();
+                    loadProducts(); // Reload products
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error adding product. Please try again.');
+            }
+        });
+    });
+
     // Initialize
     loadProducts();
+});
+
+// Modal functions
+function openAddProductModal() {
+    $('#addProductModal').show();
+}
+
+// Close modal when clicking the X
+$('.close').click(function() {
+    $('#addProductModal').hide();
+});
+
+// Close modal when clicking outside
+$(window).click(function(e) {
+    if ($(e.target).is('#addProductModal')) {
+        $('#addProductModal').hide();
+    }
 });
 </script>
