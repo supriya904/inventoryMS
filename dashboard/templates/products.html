@@ -1,0 +1,352 @@
+<div class="products-container">
+    <div class="products-header">
+        <h2>Products</h2>
+        <div class="header-buttons">
+            <button class="add-product-btn" onclick="openAddProductModal()">Add New Product</button>
+        </div>
+    </div>
+    
+    <div class="category-filters">
+        <!-- Category filters will be dynamically added here -->
+    </div>
+    
+    <div class="products-grid">
+        <!-- Products will be dynamically loaded here -->
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="addProductModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add New Product</h2>
+        <form id="addProductForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="product_name">Product Name</label>
+                <input type="text" id="product_name" name="product_name" required>
+            </div>
+            <div class="form-group">
+                <label for="category_name">Category</label>
+                <select id="category_name" name="category_name" required>
+                    <!-- Categories will be dynamically added here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Quantity in Stock</label>
+                <input type="number" id="quantity" name="quantity" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Price Per Unit</label>
+                <input type="number" id="price" name="price" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="product_image">Product Image</label>
+                <input type="file" id="product_image" name="product_image" accept="image/*" required>
+                <div id="image_preview"></div>
+            </div>
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.products-container {
+    padding: 20px;
+}
+
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.add-product-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    background: #4CAF50;
+}
+
+.product-select {
+    display: none;
+}
+
+.category-filters {
+    margin-bottom: 20px;
+}
+
+.category-filter {
+    margin-right: 10px;
+    padding: 5px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.category-filter.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.product-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.product-category {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.product-price {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.product-stock {
+    color: #28a745;
+    font-size: 0.9em;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    overflow-y: auto;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    position: relative;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.close {
+    position: sticky;
+    top: 0;
+    right: 0;
+    float: right;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2;
+    background: #fefefe;
+    padding: 0 5px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#image_preview {
+    margin-top: 10px;
+    max-width: 200px;
+}
+
+#image_preview img {
+    max-width: 100%;
+    border-radius: 4px;
+}
+</style>
+
+<script>
+function openAddProductModal() {
+    $('#addProductModal').show();
+}
+
+$(document).ready(function() {
+    let allProducts = [];
+    let activeCategory = 'all';
+
+    // Fetch products
+    function loadProducts() {
+        $.ajax({
+            url: '../api/get_products.php',
+            type: 'GET',
+            success: function(response) {
+                if (response.status) {
+                    allProducts = response.data;
+                    setupCategoryFilters();
+                    displayProducts(allProducts);
+                }
+            },
+            error: function(xhr) {
+                console.error('Error loading products:', xhr);
+            }
+        });
+    }
+
+    // Setup category filters
+    function setupCategoryFilters() {
+        const categories = ['all', ...new Set(allProducts.map(p => p.category))];
+        const filtersHtml = categories.map(cat => 
+            `<button class="category-filter ${cat === 'all' ? 'active' : ''}" 
+                     data-category="${cat}">
+                ${cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </button>`
+        ).join('');
+        
+        $('.category-filters').html(filtersHtml);
+
+        // Also update the category select in the form
+        const categoryOptions = categories
+            .filter(cat => cat !== 'all')
+            .map(cat => `<option value="${cat}">${cat}</option>`)
+            .join('');
+        $('#category_name').html(categoryOptions);
+    }
+
+    // Display products
+    function displayProducts(products) {
+        const productsHtml = products.map(product => `
+            <div class="product-card">
+                <img src="../${product.image}" alt="${product.name}" class="product-image">
+                <div class="product-info">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-category">${product.category}</div>
+                    <div class="product-price">₹${product.price.toLocaleString()}</div>
+                    <div class="product-stock">In Stock: ${product.quantity}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        $('.products-grid').html(productsHtml);
+    }
+
+    // Filter products by category
+    $(document).on('click', '.category-filter', function() {
+        const category = $(this).data('category');
+        $('.category-filter').removeClass('active');
+        $(this).addClass('active');
+        
+        const filteredProducts = category === 'all' 
+            ? allProducts 
+            : allProducts.filter(p => p.category === category);
+        
+        displayProducts(filteredProducts);
+    });
+
+    // Handle image preview
+    $('#product_image').change(function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#image_preview').html(`<img src="${e.target.result}">`);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle form submission
+    $('#addProductForm').submit(function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: '../api/add_product.php',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.status) {
+                    alert('Product added successfully!');
+                    $('#addProductModal').hide();
+                    $('#addProductForm')[0].reset();
+                    $('#image_preview').empty();
+                    loadProducts(); // Reload products
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('Error adding product. Please try again.');
+            }
+        });
+    });
+
+    // Initialize
+    loadProducts();
+    setupCategoryFilters();
+
+    // Close modal when clicking the X
+    $('.close').click(function() {
+        $('#addProductModal').hide();
+    });
+
+    // Close modal when clicking outside
+    $(window).click(function(event) {
+        if ($(event.target).is('#addProductModal')) {
+            $('#addProductModal').hide();
+        }
+    });
+});
+</script>

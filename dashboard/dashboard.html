@@ -8,6 +8,33 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Add this to your existing styles */
+        .logout-section {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .logout-section a {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .logout-section a:hover {
+            background-color: #ff4444;
+        }
+
+        .logout-section i {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -18,7 +45,7 @@
                 <span>Inventory Pro</span>
             </div>
             <div class="user-profile">
-                <img src="assets/priya.jpg" alt="Profile" class="profile-img">
+                <img src="../assets/profile/priya.jpg" alt="Profile" class="profile-img">
                 <span>Supriya</span>
             </div>
             <ul class="nav-links">
@@ -28,17 +55,19 @@
                 <li>
                     <a href="#" data-page="products"><i class="fas fa-box"></i>Products</a>
                 </li>
+                
                 <li>
                     <a href="#" data-page="transactions"><i class="fas fa-exchange-alt"></i>Transactions</a>
                 </li>
-                <li>
-                    <a href="#" data-page="suppliers"><i class="fas fa-users"></i>Suppliers</a>
-                </li>
+                
                 <li>
                     <a href="#" data-page="reports"><i class="fas fa-chart-bar"></i>Reports</a>
                 </li>
                 
             </ul>
+            <div class="logout-section">
+                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i>Logout</a>
+            </div>
         </nav>
 
         <!-- Main Content -->
@@ -87,6 +116,25 @@
                     console.error('Error loading content:', error);
                 });
         }
+        
+        // Add logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            fetch('../api/logout.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '../landing.html';
+                    } else {
+                        alert('Logout failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred during logout.');
+                });
+        });
     </script>
 </body>
 </html>
