@@ -1,4 +1,5 @@
 <?php
-header("Location: login.html");
+// Redirect to the landing page HTML
+header("Location: landing.html");
 exit();
 ?>

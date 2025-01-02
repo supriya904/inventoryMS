@@ -7,6 +7,30 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .back-to-home {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-to-home a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.3s;
+        }
+
+        .back-to-home a i {
+            margin-right: 5px;
+        }
+
+        .back-to-home a:hover {
+            color: #34495e;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -25,7 +49,12 @@
                     <label><input type="checkbox"> Remember me</label>
                     <a href="#">Forgot Password?</a>
                 </div>
-                <button type="submit">Login</button>
+                <div class="form-group">
+                    <button type="submit">Login</button>
+                </div>
+                <div class="back-to-home">
+                    <a href="landing.html"><i class="fas fa-arrow-left"></i> Back to Home</a>
+                </div>
                 <div id="error-message" style="color: red; margin-top: 10px; display: none;"></div>
             </form>
         </div>
