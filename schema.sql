@@ -33,8 +33,6 @@ INSERT INTO Products (Product_Name, Category_ID, Quantity_In_Stock, Price_Per_Un
 ('Apple iPad Air', 4, 15, 55000.00),
 ('Samsung Galaxy Watch 5', 5, 10, 19999.00);
 
-
-
 -- Table: Inventory_Transactions
 CREATE TABLE Inventory_Transactions (
     Transaction_ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,11 +41,14 @@ CREATE TABLE Inventory_Transactions (
     Quantity INT NOT NULL,
     Transaction_Date DATE NOT NULL,
     Remarks VARCHAR(255),
-    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID),
-    
+    FOREIGN KEY (Product_ID) REFERENCES Products(Product_ID)
 );
 
-
+-- Insert test transactions
+INSERT INTO Inventory_Transactions (Product_ID, Transaction_Type, Quantity, Transaction_Date, Remarks) VALUES
+(1, 'Purchase', 10, '2024-01-04', 'Initial stock purchase'),
+(2, 'Sale', 5, '2024-01-04', 'Bulk order'),
+(3, 'Purchase', 15, '2024-01-04', 'Restocking');
 
 -- Table: Users
 CREATE TABLE Users (
