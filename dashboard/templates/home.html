@@ -1,55 +1,326 @@
 <div class="dashboard-home">
+    <!-- Summary Stats -->
     <div class="stats-container">
         <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-box"></i>
+            <div class="stat-icon" style="background-color: #e3f2fd;">
+                <i class="fas fa-box" style="color: #1976d2;"></i>
             </div>
             <div class="stat-info">
                 <h3>Total Products</h3>
-                <p class="stat-number">150</p>
+                <p class="stat-number" id="totalProducts">-</p>
+                <small class="stat-label">in inventory</small>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-shopping-cart"></i>
+            <div class="stat-icon" style="background-color: #fce4ec;">
+                <i class="fas fa-exclamation-triangle" style="color: #c2185b;"></i>
             </div>
             <div class="stat-info">
-                <h3>Recent Orders</h3>
-                <p class="stat-number">25</p>
+                <h3>Low Stock Items</h3>
+                <p class="stat-number" id="lowStockCount">-</p>
+                <small class="stat-label">need attention</small>
             </div>
         </div>
-       
-    </div>
-
-    <div class="recent-activity">
-        <h2>Recent Activity</h2>
-        <div class="activity-list">
-            <div class="activity-item">
-                <span class="activity-time">2 hours ago</span>
-                <span class="activity-text">New product "Laptop HP 15" added to inventory</span>
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #e8f5e9;">
+                <i class="fas fa-exchange-alt" style="color: #388e3c;"></i>
             </div>
-            <div class="activity-item">
-                <span class="activity-time">5 hours ago</span>
-                <span class="activity-text">Order #1234 processed</span>
+            <div class="stat-info">
+                <h3>Weekly Transactions</h3>
+                <p class="stat-number" id="weeklyTransactions">-</p>
+                <small class="stat-label">last 7 days</small>
             </div>
-            <div class="activity-item">
-                <span class="activity-time">1 day ago</span>
-                <span class="activity-text">Inventory updated for "Wireless Mouse"</span>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background-color: #fff3e0;">
+                <i class="fas fa-coins" style="color: #f57c00;"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Inventory Value</h3>
+                <p class="stat-number" id="totalInventoryValue">-</p>
+                <small class="stat-label">total value</small>
             </div>
         </div>
     </div>
 
-    <div class="low-stock-alert">
-        <h2>Low Stock Alerts</h2>
-        <div class="alert-list">
-            <div class="alert-item">
-                <span class="product-name">Iphone 13</span>
-                <span class="stock-count">5 units left</span>
+    <div class="dashboard-grid">
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2><i class="fas fa-history"></i> Recent Activity</h2>
             </div>
-            <div class="alert-item">
-                <span class="product-name">hp pavilion</span>
-                <span class="stock-count">3 units left</span>
+            <div class="activity-list" id="recentActivity">
+                <!-- Will be populated dynamically -->
             </div>
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2><i class="fas fa-exclamation-circle"></i> Low Stock Alerts</h2>
+            </div>
+            <div class="alert-list" id="lowStockAlerts">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Category Distribution -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2><i class="fas fa-chart-pie"></i> Category Distribution</h2>
+            </div>
+            <canvas id="categoryChart"></canvas>
         </div>
     </div>
 </div>
+
+<style>
+.dashboard-home {
+    padding: 20px;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+}
+
+.stat-icon i {
+    font-size: 24px;
+}
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 5px 0;
+    color: #333;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 12px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.card-header h2 i {
+    margin-right: 10px;
+    color: #666;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.activity-item {
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.activity-time {
+    font-size: 12px;
+    color: #666;
+    display: block;
+}
+
+.activity-text {
+    color: #333;
+    font-size: 14px;
+}
+
+.alert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.alert-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fff3e0;
+}
+
+.product-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.stock-count {
+    color: #f57c00;
+    font-weight: 500;
+}
+
+#categoryChart {
+    width: 100% !important;
+    height: 300px !important;
+}
+</style>
+
+<script>
+// Initialize the dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+});
+
+function loadDashboardData() {
+    fetch('../api/get_dashboard_data.php')
+        .then(response => response.json())
+        .then(data => {
+            updateSummaryStats(data.summary);
+            updateRecentActivity(data.recentTransactions);
+            updateLowStockAlerts(data.lowStockProducts);
+            updateCategoryChart(data.categoryDistribution);
+        })
+        .catch(error => {
+            console.error('Error loading dashboard data:', error);
+        });
+}
+
+function updateSummaryStats(summary) {
+    document.getElementById('totalProducts').textContent = summary.totalProducts;
+    document.getElementById('lowStockCount').textContent = summary.lowStockCount;
+    document.getElementById('weeklyTransactions').textContent = summary.weeklyTransactions;
+    document.getElementById('totalInventoryValue').textContent = '₹' + parseInt(summary.totalInventoryValue).toLocaleString();
+}
+
+function updateRecentActivity(transactions) {
+    const activityList = document.getElementById('recentActivity');
+    activityList.innerHTML = '';
+
+    transactions.forEach(transaction => {
+        const timeAgo = transaction.days_ago > 0 
+            ? transaction.days_ago + ' days ago'
+            : transaction.hours_ago + ' hours ago';
+
+        const activityItem = document.createElement('div');
+        activityItem.className = 'activity-item';
+        activityItem.innerHTML = `
+            <span class="activity-time">${timeAgo}</span>
+            <span class="activity-text">
+                ${transaction.Transaction_Type === 'Purchase' ? 'Purchased' : 'Sold'}
+                ${transaction.Quantity} units of "${transaction.Product_Name}"
+            </span>
+        `;
+        activityList.appendChild(activityItem);
+    });
+}
+
+function updateLowStockAlerts(products) {
+    const alertList = document.getElementById('lowStockAlerts');
+    alertList.innerHTML = '';
+
+    products.forEach(product => {
+        const alertItem = document.createElement('div');
+        alertItem.className = 'alert-item';
+        alertItem.innerHTML = `
+            <span class="product-name">${product.Product_Name}</span>
+            <span class="stock-count">${product.Quantity_In_Stock} units left</span>
+        `;
+        alertList.appendChild(alertItem);
+    });
+}
+
+function updateCategoryChart(categories) {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: categories.map(cat => cat.Category_Name),
+            datasets: [{
+                data: categories.map(cat => cat.category_value),
+                backgroundColor: [
+                    '#1976d2',
+                    '#c2185b',
+                    '#388e3c',
+                    '#f57c00',
+                    '#7b1fa2'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const percentage = (value / categories.reduce((a, b) => a + parseFloat(b.category_value), 0) * 100).toFixed(1);
+                            return `₹${value.toLocaleString()} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Refresh dashboard data every 5 minutes
+setInterval(loadDashboardData, 300000);
+</script>
