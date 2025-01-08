@@ -1,143 +1,189 @@
 # Inventory Management System
 
-A comprehensive web-based inventory management system built with PHP and MySQL, designed to help businesses track and manage their product inventory efficiently.
+A modern web-based inventory management system built with PHP, MySQL, and JavaScript. This system helps businesses efficiently manage their inventory, track product movements, and generate comprehensive reports.
 
 ## Features
 
-### Current Features
-- Secure Login System
-  - User authentication with password hashing
-  - Role-based access (Admin)
+### 1. Dashboard
+- Real-time inventory overview
+- Total products count
+- Current inventory value
+- Recent product updates tracker
+- Interactive category distribution chart
 
-- Modern Dashboard Interface
-  - Clean and intuitive user interface
-  - Sidebar navigation with quick access to all features
-  - User profile integration
-  - Main dashboard overview with system title
+### 2. Product Management
+- Add and update products
+- Organize products by categories
+- Track stock movements (purchases and sales)
+- Add remarks for each transaction
+- Bulk update capabilities
+- Product history tracking
 
-- Product Management
-  - View all products in a responsive grid layout
-  - Filter products by categories
-  - Add new products with images
-  - Update existing products
-  - Track product quantities
-  - Set price information
-  - Image management for products
-  - Automatic transaction logging for stock changes
+### 3. Reports & Analytics
+#### Transaction Reports
+- Detailed transaction history with filtering options
+- Filter by:
+  - Date range
+  - Transaction type (Purchase/Sale)
+  - Category
+  - Product
+- Transaction details include:
+  - Transaction date and time
+  - Product information
+  - Quantity moved
+  - Transaction type
+  - User who performed the transaction
+  - Remarks/Notes
 
-- Category-based Organization
-  - Products organized by categories
-  - Category-wise product filtering
-  - Category-specific image storage
+#### Inventory Reports
+- Current stock levels for all products
+- Category-wise inventory distribution
+- Product valuation reports
+- Stock movement patterns
+- Export capabilities:
+  - CSV format
+  - PDF format (for printing)
+  - Customizable date ranges
 
-- Inventory Transactions
-  - Automatic transaction logging
-  - Track stock changes
-  - Record purchase and sale transactions
-  - Transaction history with remarks
+#### Financial Reports
+- Total inventory value
+- Product-wise value distribution
+- Category-wise value analysis
+- Transaction value reports:
+  - Purchase values
+  - Sale values
+  - Value movement trends
 
-### Planned Features
-- Reports and Analytics
-  - Stock level reports
-  - Transaction history reports
-  - Sales analytics
-- User Management
-  - Multiple user roles
-  - User permissions
-- Advanced Search
-  - Search by product name
-  - Filter by price range
-  - Stock level filters
+#### Custom Reports
+- Build custom reports based on specific needs
+- Select specific fields to include
+- Multiple format support
+- Save report templates for future use
 
-## Database Schema
+## Technical Stack
 
-The system uses MySQL with the following main tables:
+### Frontend
+- HTML5, CSS3 with modern responsive design
+- JavaScript (ES6+)
+- jQuery for DOM manipulation
+- Chart.js for interactive visualizations
+- Font Awesome icons
+- Bootstrap for responsive layouts
 
-1. **Categories**
-   - Category_ID (Primary Key)
-   - Category_Name
+### Backend
+- PHP 7.4+
+- MySQL Database
+- PDO for secure database connections
+- RESTful API architecture
 
-2. **Products**
-   - Product_ID (Primary Key)
-   - Product_Name
-   - Category_ID (Foreign Key)
-   - Quantity_In_Stock
-   - Price_Per_Unit
-   - imageAddress
+### Security Features
+- Secure authentication system
+- Password hashing using modern algorithms
+- SQL injection prevention
+- XSS protection
+- CSRF token implementation
+- Session management
+- Input validation and sanitization
 
-3. **Inventory_Transactions**
-   - Transaction_ID (Primary Key)
-   - Product_ID (Foreign Key)
-   - Transaction_Type (Purchase/Sale)
-   - Quantity
-   - Transaction_Date
-   - Remarks
+## Database Structure
 
-4. **Users**
-   - User_ID (Primary Key)
-   - Username
-   - Password_Hash
-   - Role
+The system uses the following main tables:
+- Categories
+  - Category_ID (Primary Key)
+  - Category_Name
+  - Description
+  - Created_At
+  - Updated_At
 
-## Technical Requirements
+- Products
+  - Product_ID (Primary Key)
+  - Category_ID (Foreign Key)
+  - Product_Name
+  - Description
+  - Quantity_In_Stock
+  - Unit_Price
+  - Created_At
+  - Updated_At
 
-- PHP 7.4 or higher
-- MySQL 5.7 or higher
-- Apache Web Server
-- XAMPP (recommended for local development)
-- Modern web browser with JavaScript enabled
+- Transactions
+  - Transaction_ID (Primary Key)
+  - Product_ID (Foreign Key)
+  - Transaction_Type (Purchase/Sale)
+  - Quantity
+  - Transaction_Date
+  - Remarks
+  - User_ID (Foreign Key)
 
-## Project Structure
-
-```
-inventoryMS/
-├── api/                 # API endpoints
-│   ├── config.php      # Database configuration
-│   ├── login.php       # Login authentication
-│   ├── add_product.php # Product creation
-│   └── update_product.php # Product updates
-├── assets/             # Image storage
-│   ├── Laptops/       # Category-wise images
-│   ├── Smartphones/
-│   ├── Accessories/
-│   ├── Tablets/
-│   └── Wearables/
-├── dashboard/          # Dashboard interface
-│   ├── dashboard.html  # Main dashboard
-│   ├── dashboard.css   # Dashboard styles
-│   └── templates/      # Page templates
-├── index.php          # Entry point
-├── login.html         # Login page
-├── schema.sql         # Database schema
-└── README.md          # Documentation
-```
+- Users
+  - User_ID (Primary Key)
+  - Username
+  - Password (Hashed)
+  - Email
+  - Role
+  - Last_Login
+  - Created_At
 
 ## Installation
 
-1. Clone this repository to your XAMPP's htdocs folder
-2. Import the `schema.sql` file into your MySQL database
-3. Configure database connection in `api/config.php`
-4. Access the application through your web browser
-5. Default login credentials:
-   - Username: admin1
-   - Password: password (change this in production)
+1. Clone the repository to your XAMPP's htdocs folder:
+```bash
+git clone [repository-url] /path/to/xampp/htdocs/inventoryMS
+```
 
-## Development Status
+2. Import the database:
+- Open phpMyAdmin
+- Create a new database named 'inventory'
+- Import the schema.sql file
 
-1. ✅ Basic Project Setup
-2. ✅ Database Schema Design
-3. ✅ Login System Implementation
-4. ✅ Dashboard Development
-5. ✅ Product Management
-6. ✅ Category Management
-7. ✅ Transaction Management
-8. 🔄 User Management
-9. 📅 Reports and Analytics
+3. Configure the database connection:
+- Update api/config.php with your database credentials if different from defaults
 
-## Security Features
+4. Access the system:
+- Start XAMPP (Apache and MySQL)
+- Open your browser
+- Navigate to: http://localhost/inventoryMS/
 
-- Password hashing for user credentials
-- Input sanitization
-- Prepared SQL statements to prevent SQL injection
-- File upload validation
-- Session-based authentication
+## Usage Guide
+
+### 1. Dashboard Navigation
+- View total products and inventory value
+- Monitor recent product updates
+- Analyze category distribution
+
+### 2. Product Management
+- Add new products through the product form
+- Update existing product stock using the update form
+- View and manage categories
+- Track product history
+
+### 3. Generating Reports
+1. Navigate to the Reports section
+2. Select the desired report type:
+   - Transaction History
+   - Inventory Status
+   - Financial Reports
+   - Custom Reports
+3. Apply filters as needed:
+   - Set date range
+   - Choose categories
+   - Select specific products
+4. Export or view the report:
+   - Use the export button for downloading
+   - Print directly from the browser
+   - Save report templates for future use
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## Support
+
+For support, please email [support-email] or create an issue in the repository.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

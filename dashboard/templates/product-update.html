@@ -1,0 +1,44 @@
+<div class="product-update-container">
+    <h2>Update Product Stock</h2>
+    <div class="update-form">
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" class="form-control" required>
+                <option value="">Select Category</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="product">Product:</label>
+            <select id="product" class="form-control" required disabled>
+                <option value="">Select Product</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="transaction-type">Transaction Type:</label>
+            <select id="transaction-type" class="form-control" required>
+                <option value="">Select Type</option>
+                <option value="Purchase">Purchase</option>
+                <option value="Sale">Sale</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" class="form-control" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="remarks">Remarks:</label>
+            <textarea id="remarks" class="form-control" rows="3"></textarea>
+        </div>
+
+        <button id="update-stock" class="btn btn-primary">Update Stock</button>
+    </div>
+    <div id="message" class="alert" style="display: none;"></div>
+</div>
+
+<!-- Include necessary CSS and JS -->
+<link rel="stylesheet" href="templates/product-update.css">
+<script src="templates/product-update.js"></script>
