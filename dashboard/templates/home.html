@@ -12,26 +12,6 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background-color: #fce4ec;">
-                <i class="fas fa-exclamation-triangle" style="color: #c2185b;"></i>
-            </div>
-            <div class="stat-info">
-                <h3>Low Stock Items</h3>
-                <p class="stat-number" id="lowStockCount">-</p>
-                <small class="stat-label">need attention</small>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background-color: #e8f5e9;">
-                <i class="fas fa-exchange-alt" style="color: #388e3c;"></i>
-            </div>
-            <div class="stat-info">
-                <h3>Weekly Transactions</h3>
-                <p class="stat-number" id="weeklyTransactions">-</p>
-                <small class="stat-label">last 7 days</small>
-            </div>
-        </div>
-        <div class="stat-card">
             <div class="stat-icon" style="background-color: #fff3e0;">
                 <i class="fas fa-coins" style="color: #f57c00;"></i>
             </div>
@@ -47,19 +27,9 @@
         <!-- Recent Activity -->
         <div class="dashboard-card">
             <div class="card-header">
-                <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                <h2><i class="fas fa-history"></i> Recent Product Updates</h2>
             </div>
             <div class="activity-list" id="recentActivity">
-                <!-- Will be populated dynamically -->
-            </div>
-        </div>
-
-        <!-- Low Stock Alerts -->
-        <div class="dashboard-card">
-            <div class="card-header">
-                <h2><i class="fas fa-exclamation-circle"></i> Low Stock Alerts</h2>
-            </div>
-            <div class="alert-list" id="lowStockAlerts">
                 <!-- Will be populated dynamically -->
             </div>
         </div>
@@ -187,138 +157,233 @@
     font-size: 14px;
 }
 
-.alert-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.alert-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-radius: 8px;
-    background: #fff3e0;
-}
-
-.product-name {
-    font-weight: 500;
-    color: #333;
-}
-
-.stock-count {
-    color: #f57c00;
-    font-weight: 500;
-}
-
 #categoryChart {
     width: 100% !important;
     height: 300px !important;
 }
 </style>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <script>
-// Initialize the dashboard
-document.addEventListener('DOMContentLoaded', function() {
+// Error logging function
+function logError(message, type = 'ERROR', data = {}) {
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+        timestamp,
+        type,
+        message,
+        data,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+    };
+    console.error('Log Entry:', logEntry);
+    
+    // You could also send this to your server
+    /*
+    $.post('/inventoryMS/api/log_client_error.php', {
+        log: JSON.stringify(logEntry)
+    });
+    */
+}
+
+$(document).ready(function() {
+    logError('Page loaded', 'INFO');
+    console.log('Document ready, loading dashboard data...');
     loadDashboardData();
 });
 
 function loadDashboardData() {
-    fetch('../api/get_dashboard_data.php')
-        .then(response => response.json())
-        .then(data => {
+    logError('Attempting to fetch dashboard data', 'INFO');
+    console.log('Fetching dashboard data...');
+    $.ajax({
+        url: '/inventoryMS/api/dashboard_data.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            logError('Dashboard data received', 'INFO', data);
+            console.log('Dashboard data received:', data);
+            
+            if (data.error) {
+                logError('API Error', 'ERROR', { error: data.error });
+                console.error('API Error:', data.error);
+                return;
+            }
+            
             updateSummaryStats(data.summary);
             updateRecentActivity(data.recentTransactions);
-            updateLowStockAlerts(data.lowStockProducts);
             updateCategoryChart(data.categoryDistribution);
-        })
-        .catch(error => {
-            console.error('Error loading dashboard data:', error);
-        });
+        },
+        error: function(xhr, status, error) {
+            logError('AJAX request failed', 'ERROR', {
+                status: status,
+                error: error,
+                response: xhr.responseText,
+                readyState: xhr.readyState,
+                statusCode: xhr.status,
+                statusText: xhr.statusText
+            });
+            console.error('Failed to load dashboard data:', error);
+            console.error('Status:', status);
+            console.error('Response:', xhr.responseText);
+            $('#totalProducts').text('Error');
+            $('#totalInventoryValue').text('Error');
+        }
+    });
 }
 
 function updateSummaryStats(summary) {
-    document.getElementById('totalProducts').textContent = summary.totalProducts;
-    document.getElementById('lowStockCount').textContent = summary.lowStockCount;
-    document.getElementById('weeklyTransactions').textContent = summary.weeklyTransactions;
-    document.getElementById('totalInventoryValue').textContent = '₹' + parseInt(summary.totalInventoryValue).toLocaleString();
+    try {
+        logError('Updating summary stats', 'INFO', summary);
+        console.log('Updating summary stats with:', summary);
+        if (!summary) {
+            logError('Summary data is missing', 'WARNING');
+            console.error('Summary data is missing');
+            return;
+        }
+        
+        $('#totalProducts').text(summary.totalProducts || '0');
+        $('#totalInventoryValue').text(formatCurrency(summary.totalInventoryValue || 0));
+    } catch (error) {
+        logError('Error updating summary stats', 'ERROR', { error: error.message });
+    }
 }
 
 function updateRecentActivity(transactions) {
     const activityList = document.getElementById('recentActivity');
     activityList.innerHTML = '';
 
+    if (!transactions.length) {
+        activityList.innerHTML = '<div class="no-activity">No recent activity</div>';
+        return;
+    }
+
     transactions.forEach(transaction => {
         const timeAgo = transaction.days_ago > 0 
-            ? transaction.days_ago + ' days ago'
-            : transaction.hours_ago + ' hours ago';
-
+            ? `${transaction.days_ago} days ago` 
+            : `${transaction.hours_ago} hours ago`;
+            
         const activityItem = document.createElement('div');
         activityItem.className = 'activity-item';
         activityItem.innerHTML = `
-            <span class="activity-time">${timeAgo}</span>
-            <span class="activity-text">
-                ${transaction.Transaction_Type === 'Purchase' ? 'Purchased' : 'Sold'}
-                ${transaction.Quantity} units of "${transaction.Product_Name}"
-            </span>
+            <div class="activity-icon ${transaction.Transaction_Type.toLowerCase()}">
+                <i class="fas fa-${transaction.Transaction_Type === 'Purchase' ? 'plus' : 'minus'}"></i>
+            </div>
+            <div class="activity-details">
+                <div class="activity-title">${transaction.Product_Name}</div>
+                <div class="activity-meta">
+                    ${transaction.Transaction_Type}: ${transaction.Quantity} units
+                    <span class="activity-time">${timeAgo}</span>
+                </div>
+            </div>
         `;
         activityList.appendChild(activityItem);
     });
 }
 
-function updateLowStockAlerts(products) {
-    const alertList = document.getElementById('lowStockAlerts');
-    alertList.innerHTML = '';
-
-    products.forEach(product => {
-        const alertItem = document.createElement('div');
-        alertItem.className = 'alert-item';
-        alertItem.innerHTML = `
-            <span class="product-name">${product.Product_Name}</span>
-            <span class="stock-count">${product.Quantity_In_Stock} units left</span>
-        `;
-        alertList.appendChild(alertItem);
-    });
-}
+let categoryChart = null;
 
 function updateCategoryChart(categories) {
-    const ctx = document.getElementById('categoryChart').getContext('2d');
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: categories.map(cat => cat.Category_Name),
-            datasets: [{
-                data: categories.map(cat => cat.category_value),
-                backgroundColor: [
-                    '#1976d2',
-                    '#c2185b',
-                    '#388e3c',
-                    '#f57c00',
-                    '#7b1fa2'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
+    try {
+        logError('Updating category chart', 'INFO', categories);
+        
+        if (!categories || !categories.length) {
+            logError('No category data available', 'WARNING');
+            return;
+        }
+        
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (categoryChart) {
+            categoryChart.destroy();
+        }
+        
+        const labels = categories.map(cat => cat.Category_Name);
+        const productCounts = categories.map(cat => cat.product_count);
+        const totalStocks = categories.map(cat => cat.total_stock);
+        const categoryValues = categories.map(cat => parseFloat(cat.category_value));
+        
+        categoryChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Value (₹)',
+                    data: categoryValues,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y'
+                }, {
+                    label: 'Stock Quantity',
+                    data: totalStocks,
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Total Value (₹)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Stock Quantity'
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const value = context.raw;
-                            const percentage = (value / categories.reduce((a, b) => a + parseFloat(b.category_value), 0) * 100).toFixed(1);
-                            return `₹${value.toLocaleString()} (${percentage}%)`;
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Category Distribution'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.datasetIndex === 0) {
+                                    label += formatCurrency(context.raw);
+                                } else {
+                                    label += context.raw;
+                                }
+                                return label;
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    } catch (error) {
+        logError('Error updating category chart', 'ERROR', { error: error.message });
+        console.error('Error updating category chart:', error);
+    }
+}
+
+function formatCurrency(amount) {
+    return '₹' + new Intl.NumberFormat('en-IN').format(amount);
 }
 
 // Refresh dashboard data every 5 minutes
